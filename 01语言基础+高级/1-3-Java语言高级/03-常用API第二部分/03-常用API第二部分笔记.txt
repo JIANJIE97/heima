@@ -1,0 +1,475 @@
+总结：
+	1、Object类\Objects类
+	2、Date\DateFormat抽象类\SimpleDateFormat\Calendar类
+	3、System类
+	4、StringBuilder类
+	5、包装类：
+		Byte\Short\Integer\Long\Float\Double\Character\Boolean
+		
+		
+		
+	java.lang.*:Object\System\StringBuilder\包装类
+	java.util.*:Objects\Date\Calendar\
+	java.text.*:DateFormat抽象类\SimpleDateFormat
+		
+	查看API文档，看三个地方：
+		1、包的位置与继承关系
+		2、构造方法
+		3、成员方法
+
+第1节 Object类
+	02_Object类的toString方法
+		1、java.lang.Object类是Java语言中的根类，即所有类的父类，它所描述的所有方法(11个)子类都可以使用
+		2、如果一个类没有特定父类，那么默认则继承自Object
+		3、类 Object 是类层次结构的根类。每个类都使用 Object 作为超类。所有对象（包括数组）都实现这个类的方法。 
+		4、Object的toString():返回该对象的字符串表示（直接打印对象的名字，其实就是调用对象的Object.toString()方法）
+		5、看一个类是否重写了toString()方法，直接打印这个类对象的名字即可：
+			1、如果没有重写toString()方法，那么打印的就是对象的地址值（默认）
+			2、如果重写了toString方法，那么就按照重写的方式打印
+		6、Random类的toString方法没有被重写，但是Scanner类和ArrayList类重写了toString方法
+		7、普通类重写toString方法的格式：
+			@Override
+			public String toString() {
+				return "Test{" +
+						"name='" + name + '\'' +
+						", age=" + age +
+						'}';
+			}
+			
+		8、Object的toString方法的源码：
+			public String toString() {
+				return getClass().getName() + "@" + Integer.toHexString(hashCode());
+			}
+			
+			
+			String类对toString方法进行了重写，所以直接调用字符串对象=对象.toString()= this = 字符串本身内容
+			
+		9、String的toString方法源码：
+									public String toString() {
+										return this;
+									}
+	03_Object类的equals方法
+		1、boolean eauqls(Object obj):指示其他某个对象是否与此对象"相等"
+			默认比较的是两个对象的地址值
+		2、Object类equals方法的源码：
+			public boolean equals(Object obj){
+				return (this == obj)
+			}
+		3、参数：Object obj：可以传递任何参数
+		4、方法体：
+			==比较运算符，返回的就是布尔值
+			基本数据类型比较的是值，引用数据类型比较的是地址值
+		5、this是哪个对象调用的方法，方法中的this就是哪个对象
+		6、obj是传递过来的参数
+		
+		7、注意String类的equals是重写了euqals方法的(String类的equals方法比较的是不是String对象并且内容是不是相等)
+	04_重写Object类的equals方法
+		1、Object类的equals方法默认比较的是两个对象的地址值，没有意义
+			所以我们需要重写equals方法，比较两个对象的属性值
+			对象的属性值一样返回true否则返回false
+		2、重写存在的问题：
+			隐含一个多态问题：Object类的equals方法参数为Object obj，而调用参数的时候形参是子类对象，即子类对象赋值给父类引用
+			但是多态存在弊端：父类引用无法使用子类特有的内容（属性+方法）
+			解决方法：使用下转型（强转）把父类引用转换为子类引用
+		3、需要考虑更多问题：
+			1、增加判断是不是类的实例,才能够强转，防止类型转换异常ClassCastException：obj instanceof 子类名称
+			
+			
+				if(obj insatnce 子类名称){
+					子类名称 子类对象 = (子类名称) obj;
+					boolean b = this.name.equals(子类对象.name) && this.age == 子类对象;
+					return b;
+				}
+				
+				getClass() != o.getClass()判断是不是该类的实例
+				
+				
+			2、判断形参的值是不是null,是的话直接返回false，提高程序效率
+				if(obj==null){return false;}
+			3、判断传递的参数obj是this本身，直接返回true，提高程序效率
+				if(obj==this){return true;}
+				
+			
+			
+			4、源码例子:
+				//判断是不是自身，是自身返回true
+				if (this == o) return true;
+				//判断是不是null或者obj是不是该类的实例，如果是的话返回false
+				if (o == null || getClass() != o.getClass()) return false;
+				//多态向下转型
+				Test test = (Test) o;
+				//属性值都相等才返回true
+				return age == test.age &&
+						Objects.equals(name, test.name);
+						
+						
+				注意：Objects.equals(name, test.name);其中name和test.name都是String类对象，所以比较的是内容值还有一些提高程序效率的非空非自己判断
+	05_Objects类的equals方法
+		1、java.util.Objects类，那么这个类是什么呢？
+			在**JDK7**添加了一个Objects工具类，它提供了一些方法来操作对象，它由一些静态的实用方法组成，这些方法是null-save（空指针安全的）或null-tolerant（容忍空指针的），
+			用于
+				1、计算对象的hashcode;
+				2、返回对象的字符串表示形式;
+				3、比较两个对象;
+		2、在比较两个对象的时候，Object的equals方法容易抛出空指针异常，而Objects类中的equals方法就优化了这个问题。方法如下：
+			语法格式：public static boolean equals(Object a, Object b):判断两个对象是否相等。
+		3、我们可以查看一下源码，学习一下：
+			public static boolean equals(Object a, Object b) {  
+				return (a == b) || (a != null && a.equals(b));  
+			}
+			
+			注意：a.equals(b)，如果对象a的equals没有重写过的话，就是比较地址值。如果像String类对象的话比较的就是内容
+			
+		4、使用场景：
+			如果两个字符串比较，其中一个为null或两个都为null的话，使用String的equals方法会抛出异常：NullPointerException,Null是不能调用方法的会抛出空指针异常
+			所以使用java.util.Objects类的equals(Object a,Object b)方法
+	06_1_Object类&Objects类总结
+		1、Object类
+			1、Object类介绍：
+				Object类是所有类的父类。一个类都会直接或者间接的继承该类。该类提供了一些非常常用的方法。（一共有11个方法）
+			2、toString方法：
+				A作用：打印对象信息
+				B：重写前：打印的是（包名.类名@地址值）
+				C：重写后：打印的是对象中的属性值
+			3、equals()方法：
+				A作用：比较两个对象的
+				B：重写前：比较的是对象的地址值（Object的equals方法使用this==obj）
+				C：重写后：比较的是对象的属性值（例如String的equals方法）
+		2、Objects类
+			1、equals方法：比较两个对象是否相同，但是加入了一些健壮性判断(return a==b || (a != null && a.equals(b)))
+第2节 Date类
+	06_毫秒值的概念和作用
+		1、java.util.Date:表示日期和时间的类
+			1、类Date表示特点的瞬间，精确到毫秒（千分之一秒，1000毫秒=1秒）。
+			2、毫秒值得作用：可以对时间和日期进行计算（可以吧时间和日期转换为毫秒进行计算，计算完毕再把毫秒值转换为日期）
+			3、日期转毫秒：当前的日期-时间原点（1970年1月1日00:00:00 GMT）		就是计算当前时间到时间原点之间一共经历了多少毫秒
+				注意：中国属于东8区会把时间增加8个小时（1970年1月1日08:00:00 GMT）
+			4、把毫秒转换为日期：
+				1天 = 24 * 60 * 60 = 86400秒 = 86400 * 1000 = 86400000毫秒
+			5、获取当前系统时间到1970年1月1日00:00:00经历了多少毫秒（当前日期转毫秒）
+				System.currentTimeMillis();
+	07_Date类的构造方法和成员方法
+		1、构造方法：
+			1、Date类的空参数构造方法：Date()获取的就是当前系统时间的日期和时间(有对应格式)
+				Date date = new Date();
+				System.out.println(date);//Wed Sep 11 15:55:37 CST 2019
+			2、Date类带参数的构造方法：Date(long date):传递毫秒值，把毫秒转换为Date日期
+				Date date = new Date(0L);
+				System.out.println(date);//Thu Jan 01 08:00:00 CST 1970
+		2、成员方法：
+			1、Date类的成员方法：long getTime()把日期转换为毫秒（相当于System.currentTimeMillis()）
+				返回自 1970 年 1 月 1 日 00:00:00 GMT 以来此 Date 对象表示的毫秒数。
+				Date date = new Date();
+				long time = date.getTime();
+				System.out.println(time);//1568189061270
+	08_DateFormat类&SimpleDateFormat类介绍
+		1、java.text.DateFormat:是java.text.Format的抽象子类（注意java.text.Format抽象类的子类分别有：DateFormate\MessageFormat\NumberFormat）
+			在：java.text.DateFormat，需要导包
+		2、作用：
+			1、格式化format(也就是日期格式化为文本)：将一个 Date 格式化为日期/时间字符串。
+			2、解析parse(文本解析为日期)：从给定字符串的开始解析文本，以生成一个日期。
+		3、DateFormat类成员方法
+			1、String format(Date date);按照指定的模式，把Date日期格式化为符合模式的字符串
+			2、Date parse(String sourse);把符合模式的字符串，解析为Date日期
+			注意：DateFormat类是一个抽象类，无法直接创建对象使用，可以使用DateFormat的子类（SimpleDateFormat）
+		4、SimpleDateFormat类
+			1、概念：SimpleDateFormat 是一个格式化和解析日期的具体类。它允许进行格式化（日期 -> 文本）、解析（文本 -> 日期）和规范化。 
+			2、构造方法：SimpleDateFormat(String pattern);用给定的模式和默认语言环境的日期格式符号构造 SimpleDateFormat
+				例子：DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			3、参数String pattern：传递指定的模式
+			4、模式：区分大小写
+				| 标识字母（区分大小写） | 含义  |
+				| ---------------------- | ----- |
+				| y           			 | 年    |
+				| M            			 | 月    |
+				| d           			 | 日    |
+				| H           			 | 时    |
+				| m           			 | 分    |
+				| s           			 | 秒    |
+				
+				
+				"yyyy-MM-dd HH:mm:ss"
+			5、注意模式中的字母不能更改，连接模式的符号可以改变
+	09_DateFormat类的format方法和parse方法
+		1、DateFormat类的format方法的使用步骤：
+			1、创建SimpleDateFormat对象，构造方法中传递指定的模式;
+			2、调用SimpleDateFormat对象中的format方法，按照构造方法中指定的模式，把Date日期格式化为符合模式的字符串
+				例子：
+				Date date = new Date();
+				// 创建日期格式化对象,在获取格式化对象时可以指定风格
+				DateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+				String str = df.format(date);
+				System.out.println(str); // 2008年1月23日
+		2、DateFormat类的parse方法的使用步骤：
+			1、创建SimpleDateFormat对象，构造方法中传递指定的模式;
+			2、调用SimpleDateFormat对象中的parse方法,把符合构造方法中的模式的字符串解析为Date日期
+		
+				例子：
+				//第一步
+				DateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+				String str = "2018年12月11日";
+				//第二步
+				Date date = df.parse(str);
+				System.out.println(date); // Tue Dec 11 00:00:00 CST 2018
+			3、注意事项：
+				1、格式：public Date parse(String sourse) throws ParseException
+				2、说明：parse方法声明了一个异常叫做ParseException解析异常，如果字符串与构造器传入的模式不一样，那么程序就会抛出此异常
+				3、解决方法：调用一个抛出了异常的方法，就必须处理这个异常：
+					1、要么throws继续声明抛出一个异常
+					2、要么try...catch自己处理这个异常
+		
+	10_练习_请使用日期时间相关的API，计算出一个人已经出生了多少天
+		1、**思路：**
+			1.获取当前时间对应的毫秒值
+			2.获取自己出生日期对应的毫秒值
+			3.两个时间相减（当前时间– 出生日期）
+			
+		2、具体分析：
+			1、使用Scanner类的next获取出生日期
+			2、使用DateFormat类中的parse方法把字符串解析为Date日期
+			3、把Date格式的出生日期转换为毫秒值
+			4、获取当前日期，并转换为毫秒值
+			5、使用当前日期的毫秒值-出生日期的毫秒值
+			6、把毫秒值转换为天(s/1000/60/60/24)
+第3节 Calendar类
+	11_Calendar类介绍_获取对象的方式
+		1、java.util.Calendar是日历类，在Date后出现，替换掉了许多Date的方法。
+			该类将所有可能用到的时间信息封装为静态成员变量，方便获取。日历类就是方便获取各个时间属性的。
+		2、Calendar类是一个抽象类，里面提供了很多操作日历字段的方法（YEAR\MONTH\DAY_OF_MONTH\HOUR）
+		3、Calendar类无法直接创建对象使用，里面有一个静态方法叫getInstance(),该方法返回了Calendar类的子类(GregorianCalendar)对象。
+		4、static Calendar getInstance()使用默认时区和语言环境获得一个日历。
+	12_Calendar类的常用成员方法
+		1、根据Calendar类的API文档，常用方法有：
+			1、public int get(int field)：返回给定日历字段的值。
+				例子：
+				// 创建Calendar对象
+				Calendar cal = Calendar.getInstance();
+				// 设置年 
+				int year = cal.get(Calendar.YEAR);
+				System.out.print(year + "年");
+			2、public void set(int field, int value)：将给定的日历字段设置为给定值。
+				例子：
+				Calendar cal = Calendar.getInstance();
+				cal.set(Calendar.YEAR, 2020);
+				System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2020年1月17日
+			3、public abstract void add(int field, int amount)：根据日历的规则，为给定的日历字段添加或减去指定的时间量。
+				例子：
+				Calendar cal = Calendar.getInstance();
+				System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2018年1月17日
+				// 使用add方法
+				cal.add(Calendar.DAY_OF_MONTH, 2); // 加2天
+				cal.add(Calendar.YEAR, -3); // 减3年
+				System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2015年1月18日; 
+			4、public Date getTime()：返回一个表示此Calendar时间值（从历元到现在的毫秒偏移量）的Date对象。
+				例子：
+				Calendar cal = Calendar.getInstance();
+				Date date = cal.getTime();
+				System.out.println(date); // Tue Jan 16 16:03:09 CST 2018
+
+		2、Calendar类中提供很多成员常量，代表给定的日历字段：
+			| 字段值       | 含义                      |
+			| ------------ | -------------------- 	   |
+			| YEAR         | 年                    	   |
+			| MONTH        | 月（从0开始，可以+1使用） |
+			| DAY_OF_MONTH | 月中的天（几号）          |
+			| DATE		   | 月中的天（几号）          |
+			| HOUR         | 时（12小时制）            |
+			| HOUR_OF_DAY  | 时（24小时制）            |
+			| MINUTE       | 分                    	   |
+			| SECOND       | 秒                        |
+			| DAY_OF_WEEK  | 周中的天（周几，周日为1，可以-1使用） |
+			
+			
+			
+		3、注意事项：
+			1、西方星期的开始为周日，中国为周一。
+			2、在Calendar类中，月份的表示是以0-11代表1-12月。
+			3、日期是有大小关系的，时间靠后，时间越大。
+	13_1_时间日期相关类总结
+		1、Date类
+			1、构造方法：
+				Date():根据当前时间创建时间对象
+				Date(long time)：根据传入的毫秒值时间创建时间对象
+			2、成员方法：
+				1、long getTime();获取"当前日期对象"的毫秒值时间
+				2、String toLocaleString();根据本地格式转换日期对象为字符串时间
+		2、DateFormat类和SimpleDateFormat类
+			1、构造方法：
+				SimpleDateFormat(String sourse);根据指定模板创建日期格式化对象
+			2、成员方法：
+				String format(Date d);		根据指定格式格式化日期对象为字符串
+				Date parse(String sourse);	根据指定格式解析字符串
+				注意parse会抛出异常
+		3、Calendar
+			1、创建对象方式：
+				Calendar cal = Calendar.getInstance();		获取日历类对象
+			2、成员方法：
+				1、public int get(int field)：返回给定日历字段的值。
+				2、public void set(int field, int value)：将给定的日历字段设置为给定值。
+				3、public abstract void add(int field, int amount)：根据日历的规则，为给定的日历字段添加或减去指定的时间量。
+				4、public Date getTime()：返回一个表示此Calendar时间值（从历元到现在的毫秒偏移量）的Date对象。
+第4节 System类
+	13_System类的常用方法
+		1、System包的位置：java.lang.System
+		2、System的解析：java.lang.System类中提供了大量的静态方法，可以获取与系统相关的信息或者系统级操作，在System类的API文档中常用的方法有：
+			1、public static long currentTimeMillis();返回以毫秒为单位的当前时间
+				1、使用场景：用来测试程序的效率
+				2、练习：验证for循环打印数字1-9999所需要使用的时间（毫秒）
+					long start = System.currentTimeMillis();
+					for (int i = 0; i < 10000; i++) {
+						System.out.println(i);
+					}
+					long end = System.currentTimeMillis();
+					System.out.println("共耗时毫秒：" + (end - start));
+			2、public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length);将数组中指定的数据拷贝到另一个数组中。
+				1、数组的拷贝动作是系统级的，性能很高。System.arraycopy方法具有5个参数，含义分别为：
+					1、src - 源数组。
+					2、srcPos - 源数组中的起始位置。
+					3、dest - 目标数组。
+					4、destPos - 目标数据中的起始位置。
+					5、length - 要复制的数组元素的数量。 
+				2、练习：
+					将src数组中前3个元素，复制到dest数组的前3个位置上
+					复制元素前：src数组元素[1,2,3,4,5]，dest数组元素[6,7,8,9,10]
+					复制元素后：src数组元素[1,2,3,4,5]，dest数组元素[1,2,3,9,10]
+					
+					
+					int[] src = new int[]{1,2,3,4,5};
+					int[] dest = new int[]{6,7,8,9,10};
+					System.out.println("复制前数组"+Arrays.toString(dest));
+					System.arraycopy( src, 0, dest, 0, 3);
+					System.out.println("复制后数组"+Arrays.toString(dest));
+					/*代码运行后：两个数组中的元素发生了变化
+					 src数组元素[1,2,3,4,5]
+					 dest数组元素[1,2,3,9,10]
+					*/
+
+第5节 StringBuilder类
+	14_StringBuilder的原理
+		1、String类解析：字符串是常量，它们的值在创建之后不能更改(字符串的底层是一个被final修饰的数组，不能改变，是一个常量)
+			private final byte[] value;
+		2、字符串拼接问题
+			由于String类的对象内容不可改变，所以每当进行字符串拼接时，总是会在内存中创建一个新的对象。占用空间多，效率低下。例如：
+				String s = "a"+"b"+"c";
+				"a"\"b"\"c"\"ab"\"abc"
+				三个字符串拼接，就会产生5个字符串
+				
+			为了解决这一问题，可以使用`java.lang.StringBuilder`类。
+			
+		3、StringBuilder概述
+			1、查阅`java.lang.StringBuilder`的API，StringBuilder又称为可变字符序列，它是一个类似于 String 的字符串缓冲区，
+			通过某些方法调用可以改变该序列的长度和内容。原来StringBuilder是个字符串的缓冲区，即它是一个容器，容器中可以装很多字符串。
+			并且能够对其中的字符串进行各种操作。它的内部拥有一个数组用来存放字符串内容，进行字符串拼接时，直接在数组中加入新内容。
+			StringBuilder会自动维护数组的扩容。
+			
+			2、存在那个包中：java.lang.StringBuilder类：字符串缓冲区，可以提高字符串效率（看成一个长度可以变化的字符串）
+				底层也是一个数组，但是没有被final修饰，可以改变长度(初始默认16)：byte[] value = new byte[16];
+				
+			3、StringBuilder在内存中始终是一个数组，占用空间少，效率高。如果超出了StringBuilderd的容量，会自动的扩容
+			
+	15_StringBuilder的构造方法和append方法
+		1、根据StringBuilder的API文档，常用构造方法有2个：
+			1、public StringBuilder()：构造一个空的StringBuilder容器。
+			2、public StringBuilder(String str)：构造一个StringBuilder容器，并将字符串添加进去。
+		2、StringBuilder常用的方法有2个：
+			1、public StringBuilder append(...)：添加任意类型数据的字符串形式，并返回当前对象自身
+				（无需接收返回值，直接使用之前的对象来链式编程，因为返回的是this，且参数是任意数据类型）。
+				例如：
+				//创建对象
+				StringBuilder builder = new StringBuilder();
+				builder.append("hello").append("world").append(true).append(100);
+				System.out.println("builder:"+builder);
+			2、public String toString()：将当前StringBuilder对象转换为String对象。
+	16_1String类&StringBuilder类
+		1、String和StringBuilder可以相互转换
+			1、String-->StringBuilder:使用StringBuilder的构造方法
+				StringBuilder bui = new StringBuilder(String str);构造一个StringBuilder容器，并将字符串添加进去。
+			2、StringBuilder-->String:使用StringBuilder的toString方法
+				
+				通过toString方法，StringBuilder对象将会转换为不可变的String对象。如：
+				// 链式创建
+				StringBuilder sb = new StringBuilder("Hello").append("World").append("Java");
+				// 调用方法
+				String str = sb.toString();
+				System.out.println(str); // HelloWorldJava
+	16_StringBuilder的toString方法
+第6节 基本类型包装类
+	17_包装类的概念
+		1、Java提供了两个类型系统，基本类型与引用类型，使用基本类型在于效率，然而很多情况，会创建对象使用，因为对象可以做更多的功能，
+			如果想要我们的基本类型像对象一样操作，就可以使用基本类型对应的包装类，如下：
+		2、包装类位于java.lang包中，无需引用
+			| 基本类型    | 对应的包装类（位于java.lang包中） |
+			| ------- | --------------------- |
+			| byte    | Byte                  |
+			| short   | Short                 |
+			| int     | **Integer**           |
+			| long    | Long                  |
+			| float   | Float                 |
+			| double  | Double                |
+			| char    | **Character**         |
+			| boolean | Boolean               |
+	18_包装类_装箱与拆箱
+		1、基本类型与对应的包装类对象之间，来回转换的过程称为”装箱“与”拆箱“：
+			1、* **装箱**：从基本类型转换为对应的包装类对象。
+			2、* **拆箱**：从包装类对象转换为对应的基本类型。
+			
+		2、基本数值---->包装对象
+			1、Integer i = new Integer(4);//使用构造函数函数
+			2、Integer iii = Integer.valueOf(4);//使用包装类中的valueOf方法
+		3、包装对象---->基本数值
+			int num = i.intValue();//使用包装类中的intValue方法
+			
+			
+			
+		4、注意事项：
+			1、构造方法：
+				1、Integer(int value)：构造一个新分配的 Integer 对象，它表示指定的 int 值。 
+				2、Integer(String s)：构造一个新分配的 Integer 对象，它表示 String 参数所指示的 int 值。
+					传递的字符串，必须是基本数据类型的字符串，否则会抛出异常 例如："100"正确		"a"抛异常	NumberFormatException数字格式化异常
+			
+			2、常用方法：
+				//装箱
+				1、static Integer valueOf(int i)：返回一个表示指定的 int 值的 Integer 实例。 
+				2、static Integer valueOf(String s)：返回保存指定的 String 的值的 Integer 对象。 
+				//拆箱
+				3、int intValue()：以 int 类型返回该 Integer 的值。 
+				
+				
+				4、 String toString()：返回一个表示该 Integer 值的 String 对象。 
+					重写了toString方法
+	19_包装类_自动装箱与自动拆箱
+		1、基本数据类型和包装类之间可以自动的相互转换（JDK1.5之后出现的新特性）例如：
+			1、Integer i = 4;//自动装箱。相当于Integer i = Integer.valueOf(4);
+			2、i = i + 5;//等号右边：将i对象转成基本数值因为包装类无法参与运算(自动拆箱) i.intValue() + 5;//加法运算完成后，再次装箱，把基本数值转成对象。
+			3、ArrayList<Integer> list = new ArrayList<>();ArrayList集合无法直接存储整数，可以存储Integer包装类
+				list.add(1);//自动装箱list.add(new Integer(1));/list.add(Integer.valueOf(1));
+				int a = list.get(0);//自动拆箱list.get(0).intValue();
+	20_包装类_基本类型与字符串类型之间的相互转换
+		1、基本类型转换为String（三种方式）
+			1、基本数据类型的值+"";//最简单的方式（工作中最常用）
+			2、使用包装类中的静态方法：static String toString(int i) ;//返回一个表示指定整数的 String 对象。
+				Integer.toString(1);
+			3、使用String中的静态方法：static String valueOf(int i);// 返回 int 参数的字符串表示形式。 
+				String.valueOf(1);
+		2、String转换为基本数据类型：
+			1、使用包装类的静态方法parseXxx("字符串");
+			2、例子：static int parseInt(String s)：将字符串参数作为有符号的十进制整数进行解析。
+			3、注意：如果字符串中的数据不是基本数据类型，例如"a"就会抛出异常：NumberFormatException数字格式化异常
+	21_包装类总结
+		1、基本数据类型对应的包装类
+			byte	Byte
+			short	Short
+			int		Integer
+			long	Long
+			float	Float
+			double	Double
+			char	Character
+			boolean	Boolean
+		2、数字转换为字符串
+			1、String str = 10 + "";
+			2、Integer.toString(1);
+			3、String.valueOf(1);
+		3、字符串转换为数字
+			Integer.parseInt("123");
+		4、自动拆装箱
+			基本数据类型和包装类之间可以自动的相互转换（JDK1.5之后出现的新特性）例如：

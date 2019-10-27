@@ -1,0 +1,30 @@
+1_1_11_01_集成开发环境IDE的概述
+	Integrated Development Environment	集成开发环境
+1_1_11_02_IntelliJ-IDEA的安装
+1_1_11_03_IDEA的项目结构：项目Project>模块Module>包Package>源代码.java
+	1、项目Project
+		2、模块Module
+			3、包Package
+				源代码.java
+			3、包2Package
+			3、包3Package
+			....
+		2、模块2Module
+		2、模块3Module
+		...
+
+1_1_11_04_IDEA的HelloWorld
+1_1_11_05_IDEA的基本配置
+	1、字体设置
+	2、代码补全快捷键添加和修改
+1_1_11_06_IDEA的常用快捷键
+	//快速补全alt+/
+	//拖动代码：alt+shift+上下键/ctrl+shift+上下键
+	//删除一行：ctrl+Y
+	//复制一行：ctrl+D
+	//导入包自动修正代码：alt+Enter
+	//格式化代码：ctrl+alt+l
+	//单行注释：ctrl+/
+	//多行注释：ctrl+shift+/
+	//自动生成代码,toString、get、set方法：alt+insert
+1_1_11_07_IDEA的项目关闭打开与模块的导入和删除

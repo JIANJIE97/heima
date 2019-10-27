@@ -1,0 +1,26 @@
+1、java程序开发三步骤：
+	1、编写Java源程序：生成.java文件
+	2、编译Java源文件：使用javac.exe（编译器）生成.class文件，叫java字节码文件
+	3、运行Java程序：使用java.exe（解释器）运行JVM,JVM负责对java字节码文件解释或者编译为机器指令
+	注意：java.exe是启动JVM，JVM负责对class文件的内容进行处理，将字节码文件解释或者编译为机器指令，执行。
+2、编译HelloWorld并运行常见错误
+	1、打漏了void，应该这样写
+	public class HelloWorld {
+		public static void main(String[] args) {
+			System.out.println("Hello, World!");
+		}
+	}
+	2、注意编译与运行（记忆方式：编译要后缀，运行不要后缀）：
+	编译：javac HelloWorld.java。
+	运行：java HelloWorld
+	重点：运行需要的是类名，不是写java HelloWorld.class,而是写HelloWorld
+	3、如果你需要修改代码，注意修改后的代码，你要重新编译一遍源代码。
+	原因：java运行的是你的.class文件，不是.java文件，所以你需要先编译一遍先。
+	4、注意字母编写问题：
+		1、文件名必须与类名相同
+		2、String，首字母必须大写
+		3、main方法写错，注意是main方法，不是mian方法
+3、notepad++软件的使用
+	1、设置->首选项->新建
+	默认语言：JAVA
+	编码：ANSI（扩展的ASCII编码）
