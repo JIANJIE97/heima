@@ -1,0 +1,163 @@
+01 快速入门
+	1、今日内容
+		1. Bootstrap
+	2、Bootstrap_概述
+		1. 概念： 一个前端开发的框架，Bootstrap，来自 Twitter，是目前很受欢迎的前端框架。Bootstrap 是基于 HTML、CSS、JavaScript 的，
+			它简洁灵活，使得 Web 开发更加快捷。
+		2、框架:一个半成品软件，开发人员可以在框架基础上，在进行开发，简化编码。
+		3、好处：
+			1. 定义了很多的css样式和js插件。我们开发人员直接可以使用这些样式和插件得到丰富的页面效果。
+			2. 响应式布局:同一套页面可以兼容不同分辨率的设备。
+	3、Bootstrap_快速入门
+		1、快速入门
+			1. 下载Bootstrap
+			2. 在项目中将这三个文件夹复制
+			3. 创建html页面，引入必要的资源文件
+				1、设置编码格式和兼容性设置
+				2、引入Bootstrap的CSS文件
+				3、引入Bootstrap的JS文件(先引入jQuery再引入bootstrap.min.js)
+		2、模板案例：
+			<!DOCTYPE html>
+			<html lang="zh-CN">
+			<head>
+				<meta charset="utf-8">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+				<meta name="viewport" content="width=device-width, initial-scale=1">
+				<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+				<title>Bootstrap HelloWorld</title>
+			
+				<!-- 1、引入Bootstrap的CSS文件 -->
+				<link href="css/bootstrap.min.css" rel="stylesheet">
+				
+				
+				<!-- 2、引入Bootstrap的JS文件 -->
+				<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+				<script src="js/jquery-3.2.1.min.js"></script>
+				<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+				<script src="js/bootstrap.min.js"></script>
+			</head>
+			<body>
+				<h1>你好，世界！</h1>
+			</body>
+			</html>
+02Bootstrap_栅格系统
+	1、Bootstrap_栅格系统_入门
+		1、响应式布局
+		2、CSS样式和JS插件
+		
+		
+		
+		
+		
+		3、响应式布局详解
+			1、同一套页面可以兼容不同分辨率的设备。
+			2、实现：依赖于栅格系统：将一行平均分成12个格子，可以指定元素占几个格子
+			3、步骤：
+				1. 定义容器。相当于之前的table、
+					1、容器分类：
+						1. container：两边留白
+						2. container-fluid：每一种设备都是100%宽度
+				2. 定义行。相当于之前的tr   样式：row
+				3. 定义元素。相当于之前的td	,指定该元素在不同的设备上，所占的格子数目。样式：col-设备代号-格子数目
+					1、设备代号：
+						1. xs：超小屏幕 手机 (<768px)：col-xs-12
+						2. sm：小屏幕 平板 (≥768px)
+						3. md：中等屏幕 桌面显示器 (≥992px)
+						4. lg：大屏幕 大桌面显示器 (≥1200px)
+						
+						
+
+			4、注意：
+				1. 一行中如果格子数目超过12，则超出部分自动换行。
+				2. 栅格类属性可以向上兼容。栅格类适用于与屏幕宽度大于或等于分界点大小的设备。
+				3. 如果真实设备宽度小于了设置栅格类属性的设备代码的最小值，会一个元素沾满一整行。
+				
+			5、响应式布局例子:
+				<div class="col-lg-1 col-sm-2 inner">栅格</div>
+	2、Bootstrap_栅格系统_注意事项
+	
+		4、注意：
+			1. 一行中如果格子数目超过12，则超出部分自动换行。(超出自动换行)
+			2. 栅格类属性可以向上兼容。栅格类适用于与屏幕宽度大于或等于分界点大小的设备。(向上兼容)
+			3. 如果真实设备宽度小于了设置栅格类属性的设备代码的最小值，会一个元素沾满一整行。(向下不兼容,小于最小值默认设置为12占满一行)
+03Bootstrap_全局CSS样式
+	1、Bootstrap_全局CSS样式_按钮&图片&表格&表单
+		1. 全局CSS样式：
+			1、按钮：class="btn btn-default"
+				1、首选项:class="btn btn-primary"
+				2、成功：class="btn btn-success"
+				3、一般信息：class="btn btn-info"
+				4、警告：class="btn btn-warning"
+				5、危险：class="btn btn-danger"
+				6、链接：class="btn btn-link"
+			2、图片：
+				1、class="img-responsive"：图片在任意尺寸都占100%
+				2、图片形状
+					1、<img src="..." alt="..." class="img-rounded">：方形
+					2、<img src="..." alt="..." class="img-circle"> ： 圆形
+					3、<img src="..." alt="..." class="img-thumbnail"> ：相框
+			3、表格标签的类
+				1、table:			简单表格样式
+				2、table-bordered:	带边框的表格样式
+				3、table-hover:		鼠标悬停带背景色
+			4、表单
+				
+				1、竖直排列表单:
+					<form>
+					  <div class="form-group">
+						<label for="exampleInputEmail1">Email address</label>
+						<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+					  </div>
+					</form>
+				2、水平排列表单
+					<form class="form-horizontal">
+					  <div class="form-group">
+					  
+						<label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+						
+						<div class="col-sm-10">
+						  <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+						</div>
+						
+					  </div>
+					</form>
+		2. 组件：
+			1、导航条
+			2、分页条
+		3. 插件：
+			1、轮播图
+04Bootstrap_组件和插件
+	1、Bootstrap_组件_导航条&分页条
+		1、导航条
+			想用直接去官网复制
+		2、分页条
+			1、分页条代码：
+				<nav aria-label="Page navigation">
+				  <ul class="pagination">
+					<li>
+					  <a href="#" aria-label="Previous">
+						<span aria-hidden="true">&laquo;</span>
+					  </a>
+					</li>
+					<li><a href="#">1</a></li>
+					<li><a href="#">2</a></li>
+					<li><a href="#">3</a></li>
+					<li><a href="#">4</a></li>
+					<li><a href="#">5</a></li>
+					<li>
+					  <a href="#" aria-label="Next">
+						<span aria-hidden="true">&raquo;</span>
+					  </a>
+					</li>
+				  </ul>
+				</nav>
+				
+			2、禁用和激活状态
+				1、禁用状态:<li class = "disabled"><a href="#">1</a></li>
+				2、激活状态:<li class = "active"><a href="#">1</a></li>
+	2、Bootstrap_插件_轮播图
+		
+05案例_黑马旅游网
+	1、案例_黑马旅游网_分析
+	2、案例_黑马旅游网_页眉部分
+	3、案例_黑马旅游网_主体&页脚部分

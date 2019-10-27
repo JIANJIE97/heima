@@ -1,0 +1,520 @@
+01 Request原理和继承体系
+	1、Request_原理
+		1、请求流程：
+			1、tomcat服务器会根据请求url中的资源路径,创建对应的Servlet的对象
+			2、tomcat服务器,会创建request和response对象,其中request对象封装了请求消息数据
+			3、tomcat服务器将request和response对象传递给service()方法,并且调用service()方法
+			4、程序员(我们),可以通过request对象获取请求消息数据,可以通过response对象设置响应消息数据
+			5、服务器在给浏览器做出响应之前,会从response对象中获取程序员设置的响应消息数据
+			
+		2、request对象和response对象的原理
+			1、request对象和response对象是由服务器创建的,我们来使用他们
+			2、request对象是用来获取请求消息的,response对象是用来设置响应消息的
+	2、Request_继承体系
+		request对象继承体系结构：	
+			ServletRequest		--	接口
+				|	继承
+			HttpServletRequest	-- 接口
+				|	实现
+			org.apache.catalina.connector.RequestFacade 实现类(由tomcat来实现)
+		
+02 Request_获取请求数据
+	1、Request_获取请求行数据_方法介绍
+		1. 获取请求行数据
+			1、GET /day14/demo1?name=zhangsan HTTP/1.1
+			2、方法：
+				1. 获取请求方式 ：GET
+					String getMethod()  
+				2. (*)获取虚拟目录：/day14
+					String getContextPath()
+				3. 获取Servlet路径: /demo1
+					String getServletPath()
+				4. 获取get方式请求参数：name=zhangsan
+					String getQueryString()
+				5. (*)获取请求URI：/day14/demo1
+					1、String getRequestURI():		/day14/demo1
+					2、StringBuffer getRequestURL()  :http://localhost/day14/demo1
+
+					URL:统一资源定位符 ： http://localhost/day14/demo1	中华人民共和国
+					 URI：统一资源标识符 : /day14/demo1					共和国
+				
+				6. 获取协议及版本：HTTP/1.1
+					String getProtocol()
+
+				7. 获取客户机的IP地址：
+					String getRemoteAddr()
+	2、Request_获取请求头数据
+		1、方法：
+			1、(*)String getHeader(String name):通过请求头的名称获取请求头的值
+			2、Enumeration<String> getHeaderNames():获取所有的请求头名称
+				Enumeration类似于迭代器,存在hasMoreElement()方法和nextElement()方法来遍历该类型的数据
+				
+				代码：
+				Enumeration<String> headerNames = request.getHeaderNames();
+				while(headerNames.hasMoreElement){
+					String name = headerNames.nextElement();
+					String value = request.getHeader(name);
+				}
+				
+				
+		2、获取user-agent解决浏览器兼容性问题
+			String agent = request.getHeader("user-agent");
+			if(agent.contains("Chrome")){
+				sout(谷歌);
+			}
+		3、获取referer解决盗链问题
+			String referer = request.getHeader("referer");
+			sout(referer);
+			
+			
+			注意事项：如果直接通过浏览器访问对应的连接返回值是null,如果是通过超链接跳转来的才能返回具体的值
+	3、Request_获取请求体数据
+		1、请求体：只有POST请求方式，才有请求体，在请求体中封装了POST请求的请求参数
+		2、步骤：
+			1. 获取流对象
+				1、BufferedReader getReader()：获取字符输入流，只能操作字符数据
+				2、ServletInputStream getInputStream()：获取字节输入流，可以操作所有类型数据
+					在文件上传知识点后讲解
+			2. 再从流对象中拿数据
+			
+		3、代码：
+			//1、获取字符流
+			BufferedReader br = request.getReader();
+			//2、读取数据
+			String line = null;
+			while((line = br.nextLine()) != null){
+				sout(line);
+			}
+	4、Request_获取请求参数通用方式介绍
+		1、request对象的其他功能
+			1、获取请求参数的通用(get/post)方法
+			2、请求转发
+			3、共享数据
+			4、获取ServletContext
+			
+			
+		2、详解获取请求参数的通用(get/post)方法
+			获取请求参数通用方式：不论get还是post请求方式都可以使用下列方法来获取请求参数
+			(*)	1. String getParameter(String name):根据参数名称获取参数值    username=zs&password=123
+				2. String[] getParameterValues(String name):根据参数名称获取参数值的数组  hobby=xx&hobby=game多用于获取复选框的请求数据
+				3. Enumeration<String> getParameterNames():获取所有请求的参数名称
+			(*)	4. Map<String,String[]> getParameterMap():获取所有参数的map集合
+				
+				
+		3、注意事项：
+			1、因为是通用方法,所以不管get方法还是post方法代码逻辑都是一样的,所以
+				只实现doPost()方法,在doGet()方法中调用this.doPost()方法,实现复用,简化代码
+	5、Request_获取请求参数通用方式演示
+	6、Request_获取请求参数中文乱码问题处理
+	
+		中文乱码问题：
+			1、get方式：tomcat 8 已经将get方式乱码问题解决了
+			2、post方式：会乱码
+				解决：在获取参数前，设置request的编码request.setCharacterEncoding("utf-8");
+	
+03 请求转发和request共享数据
+	1、Request_请求转发
+		请求转发：一种在服务器内部的资源跳转方式
+			1. 步骤(一般使用链式编程的方式转发)：
+				1. 通过request对象获取请求转发器对象：RequestDispatcher getRequestDispatcher(String path)
+				2. 使用RequestDispatcher对象来进行转发：forward(ServletRequest request, ServletResponse response) 
+
+			2. 特点：
+				1. 浏览器地址栏路径不发生变化
+				2. 只能转发到当前服务器内部资源中。
+				3. 转发是一次请求
+	2、Request_共享数据(域对象)
+		共享数据：
+			1、域对象：一个有作用范围的对象，可以在范围内共享数据
+			2、request域：代表一次请求的范围，一般用于请求转发的多个资源中共享数据
+			3、方法：
+				1. void setAttribute(String name,Object obj):存储数据
+				2. Object getAttitude(String name):通过键获取值
+				3. void removeAttribute(String name):通过键移除键值对
+04 Request_获取ServletContext
+	1、Request_获取ServletContext
+		ServletContext getServletContext()
+05 request登录案例
+	1、登录案例_需求
+		1.编写login.html登录页面
+			username & password 两个输入框
+		2.使用Druid数据库连接池技术,操作mysql，day14数据库中user表
+		3.使用JdbcTemplate技术封装JDBC
+		4.登录成功跳转到SuccessServlet展示：登录成功！用户名,欢迎您
+		5.登录失败跳转到FailServlet展示：登录失败，用户名或密码错误
+	2、登录案例_分析
+		开发步骤
+		1、创建项目，导入html页面，配置文件，jar包
+		2、创建数据库环境
+		3、创建包cn.itcast.domain,创建类User,这是数据库中每一个表对应一个类
+		4、创建包cn.itcast.util,编写工具类JDBCUtils
+			1、使用Durid连接池获取数据库连接对象
+			2、工具类JDBCUtils作用：
+				通过"Durid连接池技术"获取
+							1、"连接对象Connection"、
+							2、"连接池对象(数据源)DataSource"
+							
+			3、实现JDBCUtils类
+				1、通过静态代码块初始化连接池对象DataSource
+					1、加载Durid连接池的配置文件
+					2、通过Durid连接池技术初始化连接池对象DataSource
+					
+					
+		5、创建包cn.itcast.dao,创建类UserDao,提供login方法(dao是数据访问对象,是操作数据库的类,在这里编写sql数据库语句)
+			1、使用JDBCTemplate对象来简化数据库操作(JDBCTemplate类是Spring框架对JDBC的简单封装)
+			
+			
+			2、JDBCTemplate类的使用步骤
+				1. 导入jar包
+				2. 创建JdbcTemplate对象。依赖于数据源DataSource(数据库连接池对象又叫做数据源)
+					JdbcTemplate template = new JdbcTemplate(JDBCUtils.getDataSource());
+				3. 调用JdbcTemplate的方法来完成CRUD的操作
+					1、编写sql代码
+					2、调用query方法(queryForObject(sql代码,BeanPropertyRowMapper对象,sql缺省值))
+					
+					//1.编写sql
+					String sql = "select * from user where username = ? and password = ?";
+					//2.调用query方法
+					User user = template.queryForObject(sql,new BeanPropertyRowMapper<User>(User.class),loginUser.getUsername(), loginUser.getPassword());
+				4、写好dao类记得写测试类
+				
+		6、编写cn.itcast.web.servlet.LoginServlet类
+			1、编写@WebServlet注解
+			2、给请求设置编码req.setCharacterEncoding("utf-8");
+			
+			3、先获取请求的参数
+			4、根据参数实现自己的业务逻辑
+				1、调用dao层的登录方法操作数据库
+				2、如果返回值是user的话登录成功,转发给successServlet,登录成功记得把user对象设为共享数据
+				3、如果返回值是null的话登录失败,转发给failServlet
+		7、编写FailServlet和SuccessServlet类
+			1、给响应内容设置编码
+				response.setContentType("text/html;charset = utf-8");
+			2、如果需要使用共享数据,可以使用getAttribute()方法获取
+				User user = (User) request.getAttribute("user");
+            3、在页面上写入一段话
+				response.getWriter().write("登录成功！"+user.getUsername()+",欢迎您");
+		8、login.html中form表单的action路径的写法
+			虚拟目录+Servlet的资源路径
+	3、登录案例_代码实现1
+	4、登录案例_代码实现2
+	5、登录案例_BeanUtils基本使用
+		1、导入jar包commons-beanutils-1.8.0.jar
+		2、直接调用BeanUtils类的populate(Object obj , Map map)方法
+	6、登录案例_BeanUtils介绍
+		BeanUtils工具类，简化数据封装,用于封装JavaBean的
+			1. JavaBean：标准的Java类
+				1. 要求：
+					1. 类必须被public修饰
+					2. 必须提供空参的构造器
+					3. 成员变量必须使用private修饰
+					4. 提供公共setter和getter方法
+				2. 功能：封装数据
+
+
+			2. 概念：
+				1、成员变量：
+				2、属性：setter和getter方法截取后的产物
+					例如：getUsername() --> Username--> username
+
+
+			3. 方法：
+				1. setProperty()
+				2. getProperty()
+				3. populate(Object obj , Map map):将map集合的键值对信息，封装到对应的JavaBean对象中
+				
+			4、注意事项：
+				BeanUtils工具类的方法都是操作属性不是操作成员变量,所以操作的类必须是JavaBean的,不然识别不了
+
+
+06 HTTP响应协议
+	1、今日内容
+		1. HTTP协议：响应消息
+		2. Response对象
+		3. ServletContext对象
+	2、HTTP_响应消息_概述
+		1. 请求消息：客户端发送给服务器端的数据
+			数据格式：
+				1. 请求行
+				2. 请求头
+				3. 请求空行
+				4. 请求体
+		2. 响应消息：服务器端发送给客户端的数据
+			数据格式：
+				1. 响应行
+				2. 响应头
+				3. 响应空行
+				4. 响应体
+	3、HTTP_响应消息_响应行_状态码	
+		1. 响应行
+			1. 组成：协议/版本 响应状态码 状态码描述
+					HTTP/1.1	200 OK
+			2. 响应状态码：服务器告诉客户端浏览器本次请求和响应的一个状态。
+				1. 状态码都是3位数字 
+				2. 分类：
+					1. 1xx：服务器就收客户端消息，但没有接受完成，等待一段时间后，发送1xx多状态码
+					2. 2xx：成功。代表：200
+					3. 3xx：重定向。代表：302(重定向)，304(访问缓存)
+					4. 4xx：客户端错误。
+						代表：
+							404（请求路径没有对应的资源） 
+							405：请求方式没有对应的doXxx方法
+					5. 5xx：服务器端错误。代表：500(服务器内部出现异常)
+	4、HTTP_响应消息_响应头
+		2. 响应头：
+			1. 格式：
+				头名称:值
+			2. 常见的响应头：
+				1. Content-Type：服务器告诉客户端本次响应体数据格式以及编码格式
+					Content-Type:text/html;charset=UTF-8
+				2. Content-disposition：服务器告诉客户端以什么格式打开响应体数据
+					值：
+						1、in-line:默认值,在当前页面内打开
+						2、attachment;filename=xxx：以附件形式打开响应体。文件下载
+		3. 响应空行
+		4. 响应体:传输的数据(可以是HTML文件或者文件下载类型)
+		
+		
+	5、响应字符串格式
+		HTTP/1.1 200 OK
+		Content-Type: text/html;charset=UTF-8
+		Content-Length: 101
+		Date: Wed, 06 Jun 2018 07:08:42 GMT
+
+		<html>
+		  <head>
+			<title>$Title$</title>
+		  </head>
+		  <body>
+		  hello , response
+		  </body>
+		</html>
+07 response之重定向
+	案例：
+		1. 完成重定向
+		2. 服务器输出字符数据到浏览器
+		3. 服务器输出字节数据到浏览器
+		4. 验证码
+	
+	1、Response_功能介绍
+		功能：设置响应消息
+		1. 设置响应行
+			1. 格式：HTTP/1.1 200 ok
+			2. 设置状态码：setStatus(int sc) 
+		2. 设置响应头：setHeader(String name, String value) 
+		3. 设置响应体：
+			使用步骤：
+				1. 获取输出流
+					1、字符输出流：PrintWriter getWriter()
+					2、字节输出流：ServletOutputStream getOutputStream()
+				2. 使用输出流，将数据输出到客户端浏览器
+	2、Response_案例1_重定向_代码实现
+		1、重定向：资源跳转的方式
+			代码实现：
+				1、底层原理的方式:
+					//1. 设置状态码为302
+					response.setStatus(302);
+					//2.设置响应头location
+					response.setHeader("location","/day15/responseDemo2");
+
+				2、简单封装的简化方式：
+					//简单的重定向方法
+					response.sendRedirect("/day15/responseDemo2");
+	3、Response_案例1_重定向_特点
+		1、重定向的特点:redirect
+			1. 地址栏发生变化
+			2. 重定向可以访问其他站点(服务器)的资源
+			3. 重定向是两次请求。不能使用request对象来共享数据(因为不是使用同一个request来请求了)
+		2、转发的特点：forward
+			1. 转发地址栏路径不变
+			2. 转发只能访问当前服务器下的资源
+			3. 转发是一次请求，可以使用request对象来共享数据	
+		3、forward 和  redirect 区别
+08 response之相对路径和绝对路径
+	1、Response_案例1_路径_相对路径
+		1. 相对路径：通过相对路径不可以确定唯一资源
+			1、如：./index.html
+			2、不以/开头，以.开头路径
+			3、规则：找到当前资源和目标资源之间的相对位置关系(以后不推荐使用相对路径,因为规则太麻烦了)
+				1、./：当前目录
+				2、../:后退一级目录
+	2、Response_案例1_路径_绝对路径
+		2. 绝对路径：通过绝对路径可以确定唯一资源
+			1、如：http://localhost/day15/responseDemo2		/day15/responseDemo2
+			2、以/开头的路径
+			3、规则：判断定义的路径是给谁用的？判断请求将来从哪儿发出
+				1、给客户端浏览器使用：需要加虚拟目录(项目的访问路径)
+					1、建议虚拟目录动态获取：request.getContextPath()
+					2、<a> , <form> 重定向...路径都是给客户端使用的,所以需要使用虚拟目录
+				2、给服务器使用：不需要加虚拟目录
+					转发路径
+09 response之输出数据
+	1、Response_案例2_输出字符数据
+		1、步骤：
+			0、设置流的编码:response.setContentType("text/html;charset=utf-8");
+			1. 获取字符输出流:PrintWriter pw = response.getWriter();
+			2. 输出数据:pw.write();
+		2、注意：
+			乱码问题：
+				1. PrintWriter pw = response.getWriter();获取的流的默认编码是ISO-8859-1
+				2. 设置该流的默认编码
+				3. 告诉浏览器响应体使用的编码
+
+				//简单的形式，设置编码，是在获取流之前设置
+				response.setContentType("text/html;charset=utf-8");
+	2、Response_案例3_输出字节数据
+		1、步骤：
+			0、设置流的编码:response.setContentType("text/html;charset=utf-8");
+			1. 获取字节输出流:ServletOutputStream sos = response.getOutputStream();
+			2. 输出数据:sos.write("你好".getBytes("utf-8"));
+10 response之验证码
+	1、Response_案例4_验证码_分析
+		1、验证码
+			1. 本质：图片
+			2. 目的：防止恶意表单注册
+		2、验证码实现分析：
+			1、创建一个对象,在内存中代表一张图片(验证码图片对象)
+			2、美化图片
+			3、将图片使用response输出字节数据到页面展示
+	2、Response_案例4_验证码_代码实现
+		1、创建一个对象,在内存中代表一张图片(验证码图片对象)
+			BufferedImage image = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+		2、美化图片
+			1、填充背景色
+				Graphics g = image.getGraphics();//画笔对象
+				g.setColor(Color.PINK);//设置画笔颜色
+				g.fillRect(0,0,width,height);//填充矩形(x,y,width,height)
+			2、画边框
+				g.setColor(Color.BLUE);//设置画笔颜色
+				g.drawRect(0,0,width - 1,height - 1);//画矩形(x,y,width,height),注意画笔占了一个像素,宽高需要减一
+			3、写验证码
+				String str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789";//随机的字母库
+				Random ran = new Random();							//生成随机对象
+				for (int i = 1; i <= 4; i++) {						//验证码的字母个数
+					int index = ran.nextInt(str.length());			//获取每一个字母的随机角标
+					char ch = str.charAt(index);					//获取随机字符
+					g.drawString(ch+"",width/5*i,height/2);			//画验证码到图片上
+				}
+			4、画干扰线
+				g.setColor(Color.GREEN);
+				for (int i = 0; i < 10; i++) {
+					int x1 = ran.nextInt(width);		//随机生成坐标点x
+					int x2 = ran.nextInt(width);
+
+					int y1 = ran.nextInt(height);		//随机生成坐标点y
+					int y2 = ran.nextInt(height);
+					g.drawLine(x1,y1,x2,y2);			//画一条线进图片中
+				}
+		3、将图片输出到页面展示
+			ImageIO.write(image,"jpg",response.getOutputStream());
+	3、Response_案例4_验证码_点击切换
+		1、分析:点击超链接或者图片,需要换一张图片
+		2、实现：
+			1、给超链接和图片绑定单击事件
+			2、重新设置图片的src属性值(注意因为浏览器存在图片缓存,同一个src路径图片会使用缓存,所以src路径需要加上时间戳来欺骗浏览器)
+11 ServletContext对象
+	1、ServletContext_概述
+		1. 概念：代表整个web应用，可以和程序的容器(服务器)来通信
+		2. 功能：
+			1. 获取MIME类型：
+			2. 域对象：共享数据
+			3. 获取文件的真实(服务器)路径
+	2、ServletContext_获取
+		1、获取：
+			1. 通过request对象获取
+				request.getServletContext();
+			2. 通过HttpServlet获取
+				this.getServletContext();
+				
+		2、两种方式获取的ServletContext是一样的
+	3、ServletContext_功能_获取MIME类型
+		1、MIME(Multipurpose Internet Mail Extensions)多用途互联网邮件扩展类型
+		2、获取MIME类型：
+			1、MIME类型:在互联网通信过程中定义的一种文件数据类型
+				格式：大类型/小类型   
+				fileName.html	text/html
+				fileName.jpg	image/jpeg
+
+			2、获取：String getMimeType(String file)
+	4、ServletContext_功能_域对象
+		1、域对象：共享数据
+			1. setAttribute(String name,Object value)
+			2. getAttribute(String name)
+			3. removeAttribute(String name)
+
+		2、ServletContext对象范围：所有用户所有请求的数据
+	5、ServletContext_功能_获取文件服务器路径
+		1、获取文件的真实(服务器)路径(即发布在tomcat中的web项目路径)
+			1、项目结构：
+				项目名/模块名/src
+				项目名/模块名/web
+					项目名/模块名/web/WEB-INF/
+						项目名/模块名/web/WEB-INF/classes
+						项目名/模块名/web/WEB-INF/lib
+						项目名/模块名/web/WEB-INF/jsp
+			2、方法：String getRealPath(String path)
+				1、web目录下资源访问
+					String b = context.getRealPath("/b.txt");
+					System.out.println(b);
+				2、WEB-INF目录下的资源访问
+					String c = context.getRealPath("/WEB-INF/c.txt");
+					System.out.println(c);
+				3、src目录下的资源访问
+					String a = context.getRealPath("/WEB-INF/classes/a.txt");
+					System.out.println(a);
+		2、web项目路径存在两个地方:
+			1、本地工作空间存在web项目
+			2、tomcat服务器中存在web项目
+			
+			真实的项目路径指的是tomcat服务器中存在的web项目的文件路径
+	
+12 文件下载
+	1、案例_文件下载_分析
+		1、文件下载需求：
+			1. 页面显示超链接
+			2. 点击超链接后弹出下载提示框
+			3. 完成图片文件下载
+		2、分析：
+			1. 超链接指向的资源如果能够被浏览器解析，则在浏览器中展示，如果不能解析，则弹出下载提示框。不满足需求
+			2. 任何资源都必须弹出下载提示框
+			3. 使用响应头设置资源的打开方式：
+				* content-disposition:attachment;filename=xxx
+		3、步骤：
+			1. 定义页面，编辑超链接href属性，指向Servlet，传递资源名称filename
+			2. 定义Servlet
+				1. 获取文件名称
+				2. 使用字节输入流加载文件进内存
+				3. 指定response的响应头： content-disposition:attachment;filename=xxx
+			3 . 将数据写出到response输出流
+			
+			
+			
+	2、案例_文件下载_代码实现
+	3、案例_文件下载_中文文件名问题
+		1、文件下载时,中文文件名出现乱码问题
+		2、不同浏览器的编码不同,所以需要兼容
+		
+		3、解决方案：
+			1、通过request对象获取请求头(获取访问的浏览器是什么)
+				String agent = request.getHeader("user-agent");
+			2、调用工具类方法编码文件名即可。
+				filename = DownLoadUtils.getFileName(agent,filename);
+			
+			
+			
+				工具类具体实现：
+				public static String getFileName(String agent, String filename) throws UnsupportedEncodingException {
+					if (agent.contains("MSIE")) {
+						// IE浏览器
+						filename = URLEncoder.encode(filename, "utf-8");
+						filename = filename.replace("+", " ");
+					} else if (agent.contains("Firefox")) {
+						// 火狐浏览器
+						BASE64Encoder base64Encoder = new BASE64Encoder();
+						filename = "=?utf-8?B?" + base64Encoder.encode(filename.getBytes("utf-8")) + "?=";
+					} else {
+						// 其它浏览器
+						filename = URLEncoder.encode(filename, "utf-8");
+					}
+					return filename;
+				}

@@ -1,0 +1,175 @@
+第1节 登录功能
+	1、今日内容
+		综合练习
+		1. 简单功能
+			1. 列表查询
+			2. 登录
+			3. 添加
+			4. 删除
+			5. 修改
+		2. 复杂功能
+			1. 删除选中
+			2. 分页查询
+				好处：
+					1. 减轻服务器内存的开销
+					2. 提升用户体验
+			3. 复杂条件查询
+	2、页面调整
+	3、登录功能_验证码显示
+		1、调整页面，加入验证码功能
+		2、编写js代码实现点击切换验证码图片功能
+	4、登录功能_代码实现
+		1、设置编码
+        2、获取数据(1、获取验证码2、获取用户名和密码)
+        3、验证码校验(如果验证码没通过直接return并且设置错误信息转发到login.jsp)
+        4、封装User对象
+        5、调用service查询
+        6、判断是否登录成功(1、登录成功保存用户到session并重定向到index.jsp	2、登录失败设置失败信息，转发到login.jsp)
+第2节 添加删除修改功能
+	1、添加功能_分析
+		1、设置编码
+		2、获取所有数据
+		3、封装对象
+		4、调用service完成保存
+		5、跳转到userListServlet再次查询
+	2、添加功能_实现
+		1、编写jsp页面
+		2、编写servlet类
+		3、编写service层代码
+		4、编写dao层代码
+	3、删除功能_分析
+		1、获取参数id
+		2、调用service删除
+		3、跳转查询所有
+	4、删除功能_代码实现
+	5、修改功能_分析
+		1、先要把数据回显到修改页面
+			在回显数据的servlet中
+			1、获取用户id
+			2、根据id查询用户信息，得到一个user对象
+			3、将user对象存到request中
+			4、转发到update.jsp页面
+		2、在修改页面编辑信息提交给一个修改数据的servlet
+			在修改数据的servlet中
+			1、设置编码
+			2、获取表单数据map
+			3、封装User对象
+			4、调用service完成修改
+			5、跳转到查询所有数据的Servlet
+			注意事项：在jsp页面中需要设置一个隐藏域保存user的id
+	6、修改功能_代码实现1_用户信息回显
+	7、修改功能_代码实现2_用户修改
+第3节 删除选中功能
+	1、删除选中功能_分析
+		1、前端获取选中的id值提交到DelSelectedServlet
+		2、在DelSelectedServlet中
+			1、获取id数组
+			2、调用service删除，并且传递id数组过去
+		3、在service中
+			1、遍历id数组
+			2、在遍历中调用dao删除方法
+		4、在dao中
+	2、删除选中功能_代码实现_获取选中条目id
+		$(function () {
+            $("#del").click(function () {
+                $("#delFrom").submit();
+            })
+        })
+	3、删除选中功能_代码实现_删除选中服务器代码编写
+		1、获取选中的id值,是一个字符串数组
+		2、调用service的批量删除方法
+		3、重定向到获取全部用户的servelet
+	4、删除选中功能_代码实现_删除选中细节处理
+		1、全选和反选功能
+		2、在提交删除选中表单之前弹出一个确定框
+		3、在前端判断是否存在选中,没有选中的不提交表单
+		4、在service里面判断ids数组是否不为空并且长度是否大于0
+第4节 分页查询功能
+	1、分页查询功能_分析
+		1、客户端给服务器输入
+			1、每页显示的条数：int rows;
+			2、当前的页码： int currentPage;
+		2、服务器给客户端输出PageBean对象含有以下成员变量
+			1、总记录数：int totalCount = select count(id) from user;
+			2、总页码：int totalPage = 总记录数%每页显示条数?总记录数/每页显示条数:(总记录数/每页显示条数)+1;
+			3、每页的数据:List list = select * from user limit (currentPage-1)*rows,rows;
+			4、当前的页码：int currentPage;
+			5、每页显示的条数：int rows;
+	2、分页查询功能_代码实现_分析具体步骤
+		1、前端：需要向一个servlet请求，传输currentPage=1?rows=5
+		2、FindUserByPageServlet的编写：
+			1、接收请求参数(currentPage,rows)
+			2、调用service查询PageBean
+			3、将PageBean存入request
+			4、转发List.jsp展示
+		3、UserService中的findUserByPage(int currentPage,int rows)编写
+			1、创建空的PageBean对象
+			2、调用dao查询totalCount总记录数(dao.findTotalCount())
+			3、计算总页码数
+			4、设置当前页码(currentPage)和每页显示几条(rows)属性
+				在这里做健壮性检查,当前页面小于0的设置为1,大于最大值的设置为最大值
+			5、计算当前页码开始索引start=(currentPage-1)*rows;
+			6、调用查询list集合dao.findByPage(int start,int rows)
+			7、返回PageBean对象
+		4、UserDao的编写
+			1、查询总记录数:int findTotalCount()
+			2、分页查询List:List findByPage(int start,int rows)
+	3、分页查询功能_代码实现_后台代码实现
+	4、分页查询功能_代码实现_前台代码实现
+		1、基本实现：
+			1、改造list.jsp把获取到的PageBean动态加载进页面
+			2、动态加载总记录数和总页码
+			3、动态加载页码
+			4、动态加载页码跳转超链接
+		2、特殊优化：
+			1、替换index.jsp下面跳转的超链接(注意如果传的参数是空或者空字符串的话设置当前页码默认值为1,每页条数为5)
+			2、设置页码的禁用和激活状态(可以使用JSTL标签来拼接完成)
+			3、完成页码的上下页操作(注意边界值的判断,如果值为边界值,设置上下页按钮失效)
+			4、后台代码设置页码小于0，默认设置为1，页码大于最大值,默认设置为最大值
+第5节 复杂条件查询功能
+	1、复杂条件查询功能_分析
+		1、服务端输出PageBean到客户端
+			1、核心数据1：int totalCount = select count(id) from user where name like ? and address like ?;
+			2、核心数据2：List<User> list = select * from user where name like ? and address like ?;
+		2、客户端输入到服务端
+			1、提交的表单会形成一个Map集合
+			
+			
+			注意事项：服务端的PageBean中查询数据sql是需要我们客户端的数据动态生成的动态sql语句。
+			1、定义初始化sql语句：select count(id) from user where 1=1;
+			2、遍历Map集合,判断其value是否有值
+			3、字符串拼接sb.append("and ? like ?");
+	2、复杂条件查询功能_代码实现1_总记录数统计
+		1、在list.jsp上面添加form表单的action跳转servlet路径(注意form表单里面的name值是否设置好)
+		2、改造之前编写的分页查询类(findUserByPageServlet)
+			1、添加字符编码
+			2、获取条件查询参数并封装为map集合(获取参数的方法不区分post或是get)
+			3、把map结合传递给service的方法中
+			4、把map集合传递给两个dao的查询方法中(重构dao方法)
+		3、重构dao方法
+			1、定义初始化模板sql语句："select count(id) from user where 1=1";
+				把String转化为StringBuilder来使用
+			2、获取map集合的键得到一个keySet集合
+			3、定义参数的集合：List<Object> parameter = new ArrayList<Object>();
+			4、遍历map
+				1、for循环keySet获取每一个key
+				2、根据key获取每一个values(注意排除currentPage和rows参数)
+				3、判断每一个value是否为null或空字符
+				4、不为空即拼接字符串：sb.append(" and "+key+" like ?");
+				5、不为空即添加value进参数集合中：parameter.add("%"+value+"%");
+			5、修改template查询方法之前的参数(sb.toString,Integer.class,parameter.toArray())
+	3、复杂条件查询功能_代码实现2_每页数据条件查询
+		1、基本实现：
+			1、前面与上面的步骤一致,可以拷贝下来或者抽象出一个方法调用
+			2、添加分页查询的sql语句：sb.append(" limit ?,? ");
+			3、添加分页查询参数：parameter.add(start);parameter.add(rows);
+			4、修改template查询方法的参数(sb.toString,new BeanPropertyRowMapper<User>(User.class),parameter.toArray())
+			
+		2、特殊优化：
+			1、查询条件回显：
+				1、在servlet中把存放条件的map存入request：request.setAttribute("condition",condition);
+				2、在jsp页面使用el表达式回显：value="${condition.name[0]}"
+			2、优化页码的数据回显功能
+				1、在每一个页码跳转的超链接后面使用get的方式使数据回显
+				2、在上一页和下一页以及页码跳转的超链接后面添加：
+				&name=${condition.name[0]}&address=${condition.address[0]}&email=${condition.email[0]}
