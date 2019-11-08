@@ -1,0 +1,348 @@
+01-今日内容
+	软件的安装：
+		1、JDK
+		2、MYSQL
+		3、Tomcat
+		4、redis
+		5、Nginx
+02-Linux上的软件安装方式
+	?Linux上的软件安装有以下几种常见方式介绍
+		1.二进制发布包(多平台不兼容)
+			软件已经针对具体平台编译打包发布，只要解压，修改配置即可
+		2.RPM包(依赖库无法同时安装)
+			软件已经按照redhat的包管理工具规范RPM进行打包发布，需要获取到相应的软件RPM发布包，然后用RPM命令进行安装
+		3.Yum在线安装
+			软件已经以RPM规范打包，但发布在了网络上的一些服务器上，可用yum在线安装服务器上的rpm软件，并且会自动解决软件安装过程中的库依赖问题
+		4.源码编译安装(redis使用这种方式安装)
+			软件以源码工程的形式发布，需要获取到源码工程后用相应开发工具进行编译打包部署。
+03-常见的文件上传下载工具
+	1.FileZilla(使用软件来拖动文件)
+	2.lrzsz
+		我们可以使用yum安装方式安装 yum install lrzsz
+		注意：必须有网络
+		可以在crt中设置上传与下载目录
+		1、上传：rz
+		2、下载：sz 文件路径
+	3、sftp
+		使用alt + p 组合键打开sftp窗口
+		1、使用put命令上传：put window资源路径,把window上的资源上传到对应用户的目录下
+		2、使用get命令下载：get 资源名称,从用户目录下查找对应的资源并把资源下载到window下的我的文档目录中
+04-Linux安装JDK
+	【步骤一】：上传JDK到Linux的服务器.
+		1、上传JDK
+		2、卸载open-JDK
+			1、查看jdk版本
+				java –version
+			2、查看安装的jdk信息
+				rpm -qa | grep java
+			3、卸载jdk
+				rpm -e --nodeps java-1.6.0-openjdk-1.6.0.35-1.13.7.1.el6_6.i686
+				rpm -e --nodeps java-1.7.0-openjdk-1.7.0.79-2.5.5.4.el6.i686
+	【步骤二】：在Linux服务器上安装JDK.
+		1、通常将软件安装到/usr/local
+		2、直接解压就可以
+		   tar –xvf  jdk.tar.gz  -C 目标路径  
+
+	【步骤三】：配置JDK的环境变量.
+		配置环境变量：
+		① vi /etc/profile
+
+		② 在末尾行添加
+			#set java environment
+			JAVA_HOME=/usr/local/jdk/jdk1.7.0_71
+			CLASSPATH=.:$JAVA_HOME/lib.tools.jar
+			PATH=$JAVA_HOME/bin:$PATH
+			export JAVA_HOME CLASSPATH PATH
+		保存退出
+		③source /etc/profile  使更改的配置立即生效
+05-Linux安装MySQL
+	【步骤一】：将mysql的安装文件上传到Linux的服务器.
+		1、将mysql的tar解压
+		2、将系统自带的mysql卸载
+			rpm –qa | grep mysql 
+	【步骤二】：安装MYSQL服务端
+		下面的提示是告诉我们root用户的密码第一次是随机生成的，它保存在/root/.mysql_secret中，第一次登录需要修改root密码
+	【步骤三】：安装MYSQL客户端
+		1、查看生成的root密码
+		2、报错:原因是没有启动mysql服务
+			需要开启mysql服务：service mysql start
+		3、执行下面操作报错，原因是第一次操作mysql必须修改root用户的密码
+			设置root用户的密码：在mysql客户端输入set password=password('root');
+		4、关于mysql远程访问设置
+			grant all privileges on *.* to 'root' @'%' identified by 'root';
+			flush privileges;
+		5、在linux中很多软件的端口都被”防火墙”限止，我们需要将防火墙关闭
+			1、防火墙打开3306端口
+				/sbin/iptables -I INPUT -p tcp --dport 3306 -j ACCEPT
+				/etc/rc.d/init.d/iptables save
+				/etc/init.d/iptables status
+			2、学习阶段我们也可以直接将防火墙关闭
+				service iptables stop;
+06-Linux安装Tomcat
+	1.Tomcat上传到linux上
+	2.将上传的tomcat解压
+	3.在tomcat/bin目录下执行 ./startup.sh（注意防火墙）
+	4.查看目标 tomcat/logs/catalina.out
+07-Linux安装redis
+	【步骤一】安装gcc-c++
+		redis是C语言开发，安装redis需要先将官网下载的源码进行编译，编译依赖gcc环境。
+		输入命令:
+		 yum?install gcc-c++
+	【步骤二】安装redis
+		1.下载redis
+			wget http://download.redis.io/releases/redis-3.0.4.tar.gz
+		2.解压
+			tar -xzvf redis-3.0.4.tar.gz
+		3.编译安装、
+			切换至程序目录，并执行make命令编译：
+			cd redis-3.0.4
+			make
+		4、执行安装命令
+			make PREFIX=/usr/local/redis install  
+			make install安装完成后，会在/usr/local/bin目录下生成下面几个可执行文件，它们的作用分别是：
+			
+			1、redis-server：Redis服务器端启动程序
+			2、redis-cli：Redis客户端操作工具。也可以用telnet根据其纯文本协议来操作
+			3、redis-benchmark：Redis性能测试工具
+			4、redis-check-aof：数据修复工具
+			5、redis-check-dump：检查导出工具
+			
+		【步骤四】启动redis
+			1.进入redis/bin目录
+				cd redis/bin
+			2.启动redis服务端
+				./redis-server redis.conf
+			3.克隆新窗口，启动redis客户端
+				./redis-cli
+08-Linux部署案例
+	1、修改pom配置
+		在pom.xml中添加<finalName>
+	2、修改jdk版本1.7
+	3、修改项目
+		3.1、druid.properties中设置url的编码：url=jdbc:mysql://192.168.41.128:3306/travel?characterEncoding=utf-8
+		3.2、header.html设置路径为相对路径
+		3.3、route_detail.html设置路径为相对路径
+	4. 使用package命令打包
+	5. 将travel.war上传到tomcat中的webapps目录
+	6. 重启tomcat
+	7. 到出本地mysql数据，并导入linux中的mysql
+	
+	
+	
+	
+	
+	
+	1.课程目标
+		目标1：掌握Nginx的安装
+		目标2：掌握Nginx的静态网站部署
+		目标3：理解Nginx的反向代理与负载均衡，能够配置反向代理与负载均衡
+09-Nginx概述
+	1、什么是Nginx
+		Nginx 是一款高性能的 http 服务器/反向代理服务器及电子邮件（IMAP/POP3）代理服务器。
+		由俄罗斯的程序设计师伊戈尔·西索夫（Igor Sysoev）所开发，官方测试 nginx 能够支支撑 5 万并发链接，
+		并且 cpu、内存等资源消耗却非常低，运行非常稳定。
+
+	2、Nginx 应用场景：
+		1、http 服务器。Nginx 是一个 http 服务可以独立提供 http 服务。可以做网页静态服务器。
+		2、虚拟主机。可以实现在一台服务器虚拟出多个网站。例如个人网站使用的虚拟主机。
+		3、反向代理，负载均衡。当网站的访问量达到一定程度后，单台服务器不能满足用户的请求时，
+			需要用多台服务器集群可以使用 nginx 做反向代理。并且多台服务器可以平均分担负载，
+			不会因为某台服务器负载高宕机而某台服务器闲置的情况。  
+			
+	3、正向代理和反向代理的区别：
+		1、两者的区别在于代理的对象不一样：正向代理代理的对象是客户端，反向代理代理的对象是服务端
+		2、正向代理(科学上网)：我们常说的代理也就是只正向代理，正向代理的过程，它隐藏了真实的请求客户端，服务端不知道真实的客户端是谁，
+			客户端请求的服务都被代理服务器代替来请求，某些科学上网工具扮演的就是典型的正向代理角色。用浏览器访问谷歌时，
+			被残忍的block，于是你可以在国外搭建一台代理服务器，让代理帮我去请求google.com，代理把请求返回的相应结构再返回给我。
+		3、反向代理(拨打10086)隐藏了真实的服务端，当我们请求www.baidu.com的时候，就像拨打10086一样，
+			背后可能有成千上万台服务器为我们服务，但具体是哪一台，你不知道，也不需要知道，你只需要知道反向代理服务器是谁就好了，
+			www.baidu.com就是我们的反向代理服务器，反向代理服务器会帮我们把请求转发到真实的服务器那里去。
+			Nginx就是性能非常好的反向代理服务器，用来做负载均衡。
+10-Nginx在Linux下(源码安装)安装
+	1、环境准备
+		（1）需要安装 gcc 的环境【此步省略】
+			yum install gcc-c++
+		（2）第三方的开发包。
+			1、PCRE
+				1、解析：PCRE(Perl Compatible Regular Expressions)是一个 Perl 库，包括 perl 兼容的正则表达式库。
+					nginx 的 http 模块使用 pcre 来解析正则表达式，所以需要在 linux 上安装 pcre 库。
+				2、安装命令：yum install -y pcre pcre-devel
+				3、注：pcre-devel 是使用 pcre 开发的一个二次开发库。nginx 也需要此库。
+			2、zlib
+				1、解析：zlib 库提供了很多种压缩和解压缩的方式，nginx 使用 zlib 对 http 包的内容进行 gzip，所以需要在 linux 上安装 zlib 库。
+				2、安装命令：yum install -y zlib zlib-devel
+			3、OpenSSL
+				1、解析：OpenSSL 是一个强大的安全套接字层密码库，囊括主要的密码算法、常用的密钥和证书封装管理功能及 SSL 协议，
+					并提供丰富的应用程序供测试或其它目的使用。nginx 不仅支持 http 协议，还支持 https（即在 ssl 协议上传输 http），
+					所以需要在 linux安装 openssl 库。
+				2、安装命令：yum install -y openssl openssl-devel
+				
+	2、Nginx源码下载
+		官方网站下载 nginx：http://nginx.org/
+		我们课程中使用的版本是 1.8.0 版本。
+	3、Nginx源码安装
+		第一步：把 nginx 的源码包nginx-1.8.0.tar.gz上传到 linux 系统
+		第二步：解压缩
+			tar zxvf nginx-1.8.0.tar.gz
+		第三步：进入nginx-1.8.0目录，使用 configure命令创建一makeFile 文件。
+			./configure \
+			--prefix=/usr/local/nginx \
+			--pid-path=/var/run/nginx/nginx.pid \
+			--lock-path=/var/lock/nginx.lock \
+			--error-log-path=/var/log/nginx/error.log \
+			--http-log-path=/var/log/nginx/access.log \
+			--with-http_gzip_static_module \
+			--http-client-body-temp-path=/var/temp/nginx/client \
+			--http-proxy-temp-path=/var/temp/nginx/proxy \
+			--http-fastcgi-temp-path=/var/temp/nginx/fastcgi \
+			--http-uwsgi-temp-path=/var/temp/nginx/uwsgi \
+			--http-scgi-temp-path=/var/temp/nginx/scgi
+			执行后可以看到Makefile文件
+		第四步：编译
+			make
+		第五步：安装
+			make install
+	4、Nginx启动与访问
+		1、注意：启动nginx 之前，上边将临时文件目录指定为/var/temp/nginx/client， 需要在/var下创建此目录
+			命令：mkdir /var/temp/nginx/client -p
+		2、启动：
+			1、进入到Nginx目录下的sbin目录：cd /usr/local/ngiux/sbin
+			2、输入命令启动Nginx：./nginx
+			3、启动后查看进程
+				ps aux|grep nginx
+		3、访问：地址栏输入虚拟机的IP即可访问（默认为80端口）
+		4、关闭 nginx：
+			1、：./nginx -s stop
+			2、：./nginx -s quit
+			3、重启 nginx：
+				1、先关闭后启动。
+				2、刷新配置文件：
+				./nginx -s reload
+11-Nginx功能1-静态资源部署
+	1、静态网站的部署
+		1、配置nginx的配置文件
+			location / {
+				root   html/index;
+				index  index.html index.htm;
+			}
+		2、将/资料/静态页面/index目录下的所有内容上传到服务器的/usr/local/nginx/html下即可访问 
+		3、重启nginx即可
+12-Nginx功能2-虚拟主机-端口绑定
+	1、配置虚拟主机
+		虚拟主机，也叫“网站空间”，就是把一台运行在互联网上的物理服务器划分成多个“虚拟”服务器。虚拟主机技术极大的促进了网络技术的应用和普及。
+		同时虚拟主机的租用服务也成了网络时代的一种新型经济形式。
+	2、端口绑定
+		（1）上传静态网站：
+			将/资料/静态页面/index目录上传至  /usr/local/nginx//html/index下
+			将/资料/静态页面/regist目录上传至  /usr/local/nginx/html/regist下
+		（2）修改Nginx 的配置文件：/usr/local/nginx/conf/nginx.conf
+			server {
+					listen       81; # 监听的端口
+					server_name  localhost; # 域名或ip
+					location / {	# 访问路径配置
+						root   index;# 根目录
+						index  index.html index.htm; # 默认首页
+					}
+					error_page   500 502 503 504  /50x.html;	# 错误页面
+					location = /50x.html {
+						root   html;
+					}
+			}
+			 server {
+				listen       82; # 监听的端口
+				server_name  localhost; # 域名或ip
+				location / {	# 访问路径配置
+					root   regist;# 根目录
+					index  regist.html; # 默认首页
+				}
+				error_page   500 502 503 504  /50x.html;	# 错误页面
+				location = /50x.html {
+					root   html;
+				}
+			}
+		（3）访问测试：
+		地址栏输入http://192.168.177.129/:81 可以看到首页面
+		地址栏输入http://192.168.177.129/:82 可以看到注册页面
+13-Nginx功能2-虚拟主机-域名绑定
+	1、域名与IP绑定：
+		1、一个域名对应一个 ip 地址，一个 ip 地址可以被多个域名绑定。
+		2、本地测试可以修改 hosts 文件（C:\Windows\System32\drivers\etc）
+		3、可以配置域名和 ip 的映射关系，如果 hosts 文件中配置了域名和 ip 的对应关系，不需要走dns 服务器。
+			192.168.41.128	www.hmtravel.com
+			192.168.41.128	regist.hmtravel.com
+		4、做好域名指向后，修改nginx配置文件
+			server {
+				listen       80;
+				server_name  www.hmtravel.com;
+				location / {
+					root   cart;
+					index  cart.html;
+				}
+			}
+			server {
+				listen       80;
+				server_name  regist.hmtravel.com;
+				location / {
+					root   search;
+					index  search.html;
+				}
+			}
+		5、执行以下命令，刷新配置
+			[root@localhost sbin]# ./nginx -s reload
+
+		6、测试：
+			地址栏输入http://www.hmtravel.com/ 
+			地址栏输入http://regist.hmtravel.com/ 
+14-Nginx功能3-反向代理介绍
+	正向代理和反向代理的区别：
+		1、两者的区别在于代理的对象不一样：正向代理代理的对象是客户端，反向代理代理的对象是服务端
+		2、正向代理(科学上网)：我们常说的代理也就是只正向代理，正向代理的过程，它隐藏了真实的请求客户端，服务端不知道真实的客户端是谁，
+			客户端请求的服务都被代理服务器代替来请求，某些科学上网工具扮演的就是典型的正向代理角色。用浏览器访问谷歌时，
+			被残忍的block，于是你可以在国外搭建一台代理服务器，让代理帮我去请求google.com，代理把请求返回的相应结构再返回给我。
+		3、反向代理(拨打10086)隐藏了真实的服务端，当我们请求www.baidu.com的时候，就像拨打10086一样，
+			背后可能有成千上万台服务器为我们服务，但具体是哪一台，你不知道，也不需要知道，你只需要知道反向代理服务器是谁就好了，
+			www.baidu.com就是我们的反向代理服务器，反向代理服务器会帮我们把请求转发到真实的服务器那里去。
+			Nginx就是性能非常好的反向代理服务器，用来做负载均衡。
+15-Nginx功能3-反向代理准备
+	配置反向代理-准备工作
+	（1） 将travel案例部署到tomcat中（ROOT目录），上传到服务器。
+	（2）启动TOMCAT，输入网址http://192.168.177.129:8080 可以看到网站首页
+16-Nginx功能3-反向代理配置
+	（1）在Nginx主机修改 Nginx配置文件
+		upstream tomcat-travel{
+		   server 192.168.41.128:8080;
+		}
+		server {
+			listen       80; # 监听的端口
+			server_name  www.hmtravel.com; # 域名或ip
+			location / {	# 访问路径配置
+			# root   index;# 根目录
+			proxy_pass http://tomcat-travel;
+				index  index.html index.htm; # 默认首页
+			}
+		}
+	（2）重新启动Nginx  然后用浏览器测试：http://www.hmtravel.com  （此域名须配置域名指向）
+17-Nginx功能3-负载均衡
+	1、什么是负载均衡
+		1、负载均衡 建立在现有网络结构之上，它提供了一种廉价有效透明的方法扩展网络设备和服务器的带宽、增加吞吐量、
+			加强网络数据处理能力、提高网络的灵活性和可用性。
+		2、负载均衡，英文名称为Load Balance，其意思就是分摊到多个操作单元上进行执行，例如Web服务器、FTP服务器、
+			企业关键应用服务器和其它关键任务服务器等，从而共同完成工作任务。
+	2、 配置负载均衡-准备工作
+		（1）将刚才的存放工程的tomcat复制三份，修改端口分别为8080 ，8081，8082
+		（2）分别启动这三个tomcat服务。
+		（3）为了能够区分是访问哪个服务器的网站，可以在首页标题加上标记以便区分
+	3、配置负载均衡
+		1、修改 Nginx配置文件：
+			upstream tomcat-travel {
+			   server 192.168.177.129:8080;
+			   server 192.168.177.129:8081;
+			   server 192.168.177.129:8082;
+			}
+		2、如果其中一台服务器性能比较好，想让其承担更多的压力，可以设置权重。比如想让NO.1出现次数是其它服务器的2倍，则修改配置如下：
+			因为默认权重为1，如果设置为2:1:1的话，就可以占用了50%的分配
+			upstream tomcat-travel {
+			   server 192.168.177.129:8080;
+			   server 192.168.177.129:8081 weight=2;
+			   server 192.168.177.129:8082;
+			}

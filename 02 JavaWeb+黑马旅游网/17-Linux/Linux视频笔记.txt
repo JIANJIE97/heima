@@ -1,0 +1,226 @@
+01-今日内容
+	1、对文件和目录的增删改查
+	2、解压缩命令
+	3、重定向输出&系统进程的命令
+	4、管道命令
+	5、Linux权限
+
+
+02-Linux概述
+	1、Linux系统的应用:
+		服务器系统:Web应用服务器、数据库服务器、接口服务器、DNS、FTP等等； 
+03-虚拟机软件-VMware
+04-Linux安装
+05-CRT使用
+	SecureCRT一种window远程连接服务器的软件
+06-Linux目录结构
+	1、/：根目录
+	2、~：当前家目录
+	3、root管理员的home目录：/root
+	4、其他用户的home目录：/home/***
+07-Linux命令-文件列表(ls和ll)
+
+	1、ls(list)是一个非常有用的命令，用来显示当前目录下的内容。配合参数的使用，能以不同的方式显示目录内容。格式：ls[参数] [路径或文件名]
+	2、常用命令：
+		1、ls		显示目录和文件的名称
+		2、ls -a  	显示所有文件或目录的名称（包含隐藏的文件）
+		3、ls -l  	显示目录和文件的详细信息(可以缩写成ll)
+	3、注意：在linux中以 . 开头的文件都是隐藏的文件
+
+08-Linux命令-目录切换(cd)
+	1、使用cd app	切换到app目录
+	2、cd ..	切换到上一层目录
+	3、cd /		切换到系统根目录
+	4、cd ~		切换到用户主目录(家目录)
+	5、cd -		切换到上一个所在目录
+	6、pwd		查看当前路径
+	7、使用tab键来补全文件路径
+
+09-Linux命令-目录创建和删除(mkdir和rmdir)
+	1、mkdir(make directory)命令可用来创建子目录。
+		1、mkdir app    在当前目录下创建app目录
+		2、mkdir –p app2/test   级联创建aap2以及test目
+	2、rmdir(remove directory)命令可用来删除“空”的子目录
+		1、rmdir app    删除app目录
+	3、可以使用mkdir --help查看参数说明
+10-Linux命令-文件查看(cat\more\less和tail)
+	1、cat用于显示文件的内容。格式：cat[参数]<文件名>
+		cat yum.conf
+	2、more一般用于要显示的内容会超过一个画面长度的情况。
+		1、按空格键显示下一个画面。
+		2、回车显示下一行内容。
+		3、按 q 键退出查看。
+		4、案例：more yum.conf
+			空格显示下一页数据  回车显示下一行的数据
+	3、less用法和more类似，不同的是less可以通过PgUp、PgDn键来控制。
+		less yum.conf
+			PgUp 和 PgDn 进行上下翻页.
+			
+	4、tail命令是在实际使用过程中使用非常多的一个命令，它的功能是：用于显示文件后几行的内容。
+		1、用法:
+			1、tail -10 /etc/passwd    查看后10行数据
+			2、tail -f catalina.log    动态查看日志(*****)
+			3、ctrl+c 结束查看
+11-Linux命令-文件删除、拷贝(rm和cp/mv)
+	1、cp(copy)命令可以将文件从一处复制到另一处。一般在使用cp命令时将一个文件复制成另一个文件或复制到某目录时，需要指定源文件名与目标文件名或目录。
+		cp a.txt b.txt    将a.txt复制为b.txt文件
+		cp a.txt ../    将a.txt文件复制到上一层目录中
+
+	2、mv 移动或者重命名
+		mv a.txt ../    将a.txt文件移动到上一层目录中
+		mv a.txt b.txt    将a.txt文件重命名为b.txt
+	3、rm  删除文件
+		1、用法：rm [选项]... 文件...
+			rm a.txt    删除a.txt文件，删除需要用户确认，y/nrm 删除不询问
+		2、常用参数：-recursive递归删除、-force暴力，不询问
+			1、rm -f a.txt    不询问，直接删除rm 删除目录
+			2、rm -r a    	递归删除不询问递归删除（慎用）
+			3、rm -rf  a    	不询问递归删除
+			4、rm -rf *      	删除所有文件
+			5、rm -rf /*      自杀
+12-Linux命令-压缩、解压缩(tar)
+	1、tar命令位于/bin目录下，它能够将用户所指定的文件或目录打包成一个文件，但不做压缩。
+		一般Linux上常用的压缩方式是选用tar将许多文件打包成一个文件，再以gzip压缩命令压缩成xxx.tar.gz(或称为xxx.tgz)的文件。
+	2、常用参数：
+		-c：创建一个新tar文件(creat)
+		-v：显示运行过程的信息(verbosely详细列出)
+		-f：指定文件名(file)
+		-z：调用gzip压缩命令进行压缩(gzip)
+		-t：查看压缩文件的内容(list)
+		-x：解开tar文件(extract提取)
+		-C：更改目录
+
+	3、打包：
+		tar –cvf xxx.tar ./*
+	4、打包并且压缩：
+		tar –zcvf xxx.tar.gz ./* 
+
+	5、解压 
+		1、解压tar包：tar –xvf xxx.tar
+		2、解压tar.gz包：tar -zxvf xxx.tar.gz -C /usr/aaa
+
+13-Linux命令-查找文件、内容(find查找文件、grep查找文件内容)
+	1、【find】命令：find指令用于查找符合条件的文件
+		示例：
+		find / -name “ins*” 查找文件名称是以ins开头的文件
+		find / -name “ins*” –ls 
+		find / –user itcast –ls 查找用户itcast的文件
+		find / –user itcast –type d –ls 查找用户itcast的目录
+		find /-perm -777 –type d-ls 查找权限是777的文件
+
+		
+	2、【grep】命令：查找文件里符合条件的字符串。
+		1、用法: grep [选项]... PATTERN [FILE]...示例：
+			1、grep lang anaconda-ks.cfg  在文件中查找lang
+			2、grep lang anaconda-ks.cfg –color 高亮显示
+			3、grep lang anaconda-ks.cfg –color -A5 高亮显示前5行
+			4、grep lang anaconda-ks.cfg –color -B5	高亮显示后5行
+
+14-Linux命令-其他常见命令
+	1、【pwd】：显示当前所在目录
+	2、【touch】：创建一个空文件
+			touch a.txt
+	3、【clear/ crtl + L】：清屏
+15-Linux命令-VIM编辑器vim
+	1、在Linux下一般使用vi编辑器来编辑文件。vi既可以查看文件也可以编辑文件。三种模式：命令行、插入、底行模式。
+	2、三种模式可以转换(命令行模式是他们的转换的中转站)
+		1、vim打开文件会直接进入命令行模式->按i进入插入模式
+		2、vim打开文件会直接进入命令行模式->按shift+:进入底行模式
+		3、插入模式->命令行模式：按esc
+		
+	3、几种保存退出的命令
+		1、没有修改的退出：esc ->:q
+		2、保存的退出：esc->:wq
+		3、不保存退出：esc->:q!
+	4、在命令行模式的快捷键：
+		dd – 快速删除一行
+		yy - 复制当前行
+		nyy - 从当前行向后复制几行
+		p - 粘贴
+		R – 替换
+
+16-Linux命令-重定向输出&系统命令(>和>>命令/ps和kill命令)
+	1、重定向输出>和>>
+		1、>  重定向输出，覆盖原有内容；
+			cat /etc/passwd > a.txt  将输出定向到a.txt中
+		2、>> 重定向输出，又追加功能；示例：
+			cat /etc/passwd >> a.txt  输出并且追加
+			
+	2、系统管理命令(ps和kill命令)
+		1、ps命令：
+			1、ps 正在运行的某个进程的状态
+			2、ps –ef  查看所有进程
+			3、ps –ef | grep ssh 查找某一进程
+		2、kill命令：
+			1、kill 2868  杀掉2868编号的进程
+			2、kill -9 2868  强制杀死进程
+17-Linux命令-管道
+	1、管道是Linux命令中重要的一个概念，其作用是将一个命令的输出用作另一个命令的输入。
+	2、示例
+		1、ls --help | more  分页查询帮助信息
+		2、ps –ef | grep java  查询名称中包含java的进程
+18-Linux权限
+	1、代表文件权限有10位，可以分为4种分类
+		1、第1位：普通文件（-）目录（d）符号链接（l）
+		2、第2,3,4位：当前用户具有该文件的权限(user)
+		2、第5,6,7位：当前组内其他用户具有该文件的权限(group)
+		2、第8,9,10位：其他组的用户具有该文件的权限(other)
+		
+	2、每一个权限字母代表含义
+		r(4):对文件是指可读取内容 对目录是可以ls
+		w(2):对文件是指可修改文件内容，对目录 是指可以在其中创建或删除子节点(目录或文件)
+		x(1):对文件是指是否可以运行这个文件，对目录是指是否可以cd进入这个目录
+	3、Linux三种文件类型：
+		普通文件： 包括文本文件、数据文件、可执行的二进制程序文件等。 
+		目录文件： Linux系统把目录看成是一种特殊的文件，利用它构成文件系统的树型结构。  
+		设备文件： Linux系统把每一个设备都看成是一个文件
+
+	4、文件权限管理：
+		chmod 变更文件或目录的权限。
+			1、chmod 755 a.txt
+				- wrx r-x r-x
+			2、chmod u=rwx,g=rx,o=rx a.txt
+				- wrx r-x r-x
+19-Linux修改ip
+	1、主机名配置
+		1、hostname 查看主机名
+		2、hostname xxx 修改主机名 重启后无效
+		3、如果想要永久生效，可以修改/etc/sysconfig/network文件
+	2、IP地址配置
+		1、
+			ifconfig 查看(修改)ip地址(重启后无效)
+			ifconfig eth0 192.168.12.22 修改ip地址
+		2、如果想要永久生效
+			修改 /etc/sysconfig/network-scripts/ifcfg-eth0文件
+				DEVICE=eth0 #网卡名称
+				BOOTPROTO=static #获取ip的方式(static/dhcp/bootp/none)
+				HWADDR=00:0C:29:B5:B2:69 #MAC地址
+				IPADDR=192.168.177.129 #IP地址
+				NETMASK=255.255.255.0 #子网掩码
+				NETWORK=192.168.177.0 #网络地址
+				BROADCAST=192.168.0.255 #广播地址
+				NBOOT=yes #  系统启动时是否设置此网络接口，设置为yes时，系统启动时激活此设备。
+		3、service network restart重启网络服务
+20-Linux域名映射
+	1、域名映射
+		/etc/hosts文件用于在通过主机名进行访问时做ip地址解析之用,
+		相当于windows系统的C:\Windows\System32\drivers\etc\hosts文件的功能
+		
+	2、网络服务管理
+		1、
+			service network status 查看指定服务的状态
+			service network stop 停止指定服务
+			service network start 启动指定服务
+			service network restart 重启指定服务
+
+		2、
+			service --status–all 查看系统中所有后台服务
+			netstat –nltp 查看系统中网络进程的端口监听情况
+
+		3、防火墙设置
+			防火墙根据配置文件/etc/sysconfig/iptables来控制本机的”出”、”入”网络访问行为。
+			service iptables status 查看防火墙状态
+			service iptables stop 关闭防火墙
+			service iptables start 启动防火墙
+			chkconfig  iptables off 禁止防火墙自启
+
